@@ -1,7 +1,7 @@
 
-# Full Stack AI Mock Interview App
+# Full Stack Interview AI
 
-**Welcome to the Full Stack AI Mock Interview App!**  
+**Welcome to the Full Stack Interview AI!**  
 This project is designed to help developers enhance their skills through AI-driven mock interviews, providing real-time feedback to simulate a realistic interview experience.
 
 ## Table of Contents
@@ -38,12 +38,12 @@ To get started with the project, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/ai-mock-interview.git
+   git clone https://github.com/yourusername/Interview-AI.git
    ```
 
 2. Navigate to the project directory:
    ```bash
-   cd full-stack-ai-mock-interview-app
+   cd Interview-AI
    ```
 
 3. Install the dependencies:
@@ -65,7 +65,7 @@ We welcome contributions! Please follow these steps to contribute:
 1. **Fork the repository**: Click the "Fork" button at the top right corner of this repository.
 2. **Clone your fork**:
    ```bash
-   git clone https://github.com/yourusername/full-stack-ai-mock-interview-app.git
+   git clone https://github.com/Aditya07771/Interview-AI.git
    ```
 3. **Create a new branch**:
    ```bash
