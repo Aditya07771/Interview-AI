@@ -1,28 +1,26 @@
 "use client";
-import { db } from '@/utils/db';
-import { UserAnswer } from '@/utils/schema';
-import { eq } from 'drizzle-orm';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { 
-  CheckCircle2, 
-  XCircle, 
-  ChevronsUpDown, 
-  Activity, 
-  Target 
-} from 'lucide-react';
+import {
+  CheckCircle2,
+  XCircle,
+  ChevronsUpDown,
+  Activity,
+  Target,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 const Feedback = ({ params }) => {
   const [feedbackList, setFeedbackList] = useState([]);
   const [averageRating, setAverageRating] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -30,30 +28,65 @@ const Feedback = ({ params }) => {
   }, []);
 
   const GetFeedback = async () => {
-    setLoading(true);
-    const result = await db.select()
-      .from(UserAnswer)
-      .where(eq(UserAnswer.mockIdRef, params.interviewId))
-      .orderBy(UserAnswer.id);
+    try {
+      setLoading(true);
+      setError(null);
 
-    setFeedbackList(result);
-    setLoading(false);
+      // Call the correct API endpoint
+      const res = await fetch(`/api/interview/${params.interviewId}/feedback`, {
+        method: "GET",
+        cache: "no-store",
+      });
 
-    // Calculate the average rating dynamically, only including valid ratings
-    const validRatings = result
-      .map((item) => parseFloat(item.rating))
-      .filter((rating) => !isNaN(rating));
+      if (!res.ok) {
+        throw new Error("Failed to fetch feedback");
+      }
 
-    const totalRating = validRatings.reduce((sum, rating) => sum + rating, 0);
-    const avgRating = validRatings.length > 0 
-      ? (totalRating / validRatings.length).toFixed(1) 
-      : "N/A";
+      const result = await res.json();
+      console.log("Feedback API response:", result);
 
-    setAverageRating(avgRating);
+      // Handle the response structure - check if data is nested
+      const feedbackData = result.success ? result.data : result;
+
+      // Ensure feedbackData is an array
+      if (!Array.isArray(feedbackData)) {
+        console.error("Feedback data is not an array:", feedbackData);
+        setFeedbackList([]);
+        setAverageRating("N/A");
+        return;
+      }
+
+      setFeedbackList(feedbackData);
+
+      // Calculate average rating
+      if (feedbackData.length > 0) {
+        const validRatings = feedbackData
+          .map((item) => parseFloat(item.rating))
+          .filter((rating) => !isNaN(rating));
+
+        if (validRatings.length > 0) {
+          const totalRating = validRatings.reduce((sum, rating) => sum + rating, 0);
+          const avgRating = (totalRating / validRatings.length).toFixed(1);
+          setAverageRating(avgRating);
+        } else {
+          setAverageRating("N/A");
+        }
+      } else {
+        setAverageRating("N/A");
+      }
+    } catch (error) {
+      console.error("Error loading feedback:", error);
+      setError(error.message);
+      setFeedbackList([]);
+      setAverageRating("N/A");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getRatingColor = (rating) => {
     const numRating = parseFloat(rating);
+    if (isNaN(numRating)) return "text-gray-600";
     if (numRating >= 8) return "text-green-600";
     if (numRating >= 5) return "text-yellow-600";
     return "text-red-600";
@@ -70,6 +103,31 @@ const Feedback = ({ params }) => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Card className="max-w-md mx-auto">
+          <CardHeader className="text-center">
+            <XCircle className="mx-auto h-16 w-16 text-red-500" />
+            <h2 className="text-2xl font-bold text-gray-800 mt-4">
+              Error Loading Feedback
+            </h2>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-gray-600 mb-6">{error}</p>
+            <Button
+              variant="outline"
+              onClick={() => router.replace("/dashboard")}
+              className="w-full"
+            >
+              Return to Dashboard
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       {feedbackList.length === 0 ? (
@@ -82,16 +140,24 @@ const Feedback = ({ params }) => {
           </CardHeader>
           <CardContent className="text-center">
             <p className="text-gray-600 mb-6">
-              It seems like no feedback has been generated for this interview. 
-              This could be due to an incomplete interview or a system issue.
+              It seems like no feedback has been generated for this interview yet.
+              Please complete the interview questions first.
             </p>
-            <Button 
-              variant="outline" 
-              onClick={() => router.replace('/dashboard')}
-              className="w-full"
-            >
-              Return to Dashboard
-            </Button>
+            <div className="space-y-2">
+              <Button
+                onClick={() => router.push(`/dashboard/interview/${params.interviewId}/start`)}
+                className="w-full"
+              >
+                Start Interview
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => router.replace("/dashboard")}
+                className="w-full"
+              >
+                Return to Dashboard
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ) : (
@@ -102,15 +168,21 @@ const Feedback = ({ params }) => {
                 <CheckCircle2 className="h-12 w-12 text-green-600" />
                 <div>
                   <h2 className="text-3xl font-bold text-green-600">Great Job!</h2>
-                  <p className="text-gray-600">You've completed your mock interview.</p>
+                  <p className="text-gray-600">
+                    You've completed your mock interview.
+                  </p>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-gray-500">Overall Rating</p>
-                    <p className={`text-2xl font-bold ${getRatingColor(averageRating)}`}>
-                      {averageRating ? `${averageRating}/10` : 'N/A'}
+                    <p
+                      className={`text-2xl font-bold ${getRatingColor(
+                        averageRating
+                      )}`}
+                    >
+                      {averageRating !== "N/A" ? `${averageRating}/10` : "N/A"}
                     </p>
                   </div>
                   <div>
@@ -133,50 +205,54 @@ const Feedback = ({ params }) => {
             </p>
 
             {feedbackList.map((item, index) => (
-              <Collapsible key={index} className="border rounded-lg overflow-hidden">
+              <Collapsible key={item.id || index} className="border rounded-lg overflow-hidden">
                 <CollapsibleTrigger className="w-full">
                   <div className="flex items-center justify-between p-4 bg-gray-100 hover:bg-gray-200 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <Target 
-                        className={`h-5 w-5 ${
-                          parseFloat(item.rating) >= 7 
-                            ? "text-green-500" 
-                            : parseFloat(item.rating) >= 4 
-                            ? "text-yellow-500" 
+                    <div className="flex items-center gap-3 flex-1">
+                      <Target
+                        className={`h-5 w-5 flex-shrink-0 ${
+                          parseFloat(item.rating) >= 7
+                            ? "text-green-500"
+                            : parseFloat(item.rating) >= 4
+                            ? "text-yellow-500"
                             : "text-red-500"
-                        }`} 
+                        }`}
                       />
-                      <span className="font-medium text-gray-800 line-clamp-1">
-                        {item.question}
+                      <span className="font-medium text-gray-800 text-left line-clamp-1">
+                        Q{index + 1}: {item.question}
                       </span>
                     </div>
-                    <ChevronsUpDown className="h-4 text-gray-500" />
+                    <ChevronsUpDown className="h-4 text-gray-500 flex-shrink-0 ml-2" />
                   </div>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="p-4 bg-white">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <h4 className="font-semibold text-gray-700 mb-2">Your Answer</h4>
+                      <h4 className="font-semibold text-gray-700 mb-2">
+                        Your Answer
+                      </h4>
                       <p className="bg-red-50 p-3 rounded-lg text-sm text-red-900 border border-red-200">
                         {item.userAns || "No answer provided"}
                       </p>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-700 mb-2">Correct Answer</h4>
+                      <h4 className="font-semibold text-gray-700 mb-2">
+                        Correct Answer
+                      </h4>
                       <p className="bg-green-50 p-3 rounded-lg text-sm text-green-900 border border-green-200">
-                        {item.correctAns}
+                        {item.correctAns || "N/A"}
                       </p>
                     </div>
                   </div>
                   <div className="mt-4">
                     <h4 className="font-semibold text-gray-700 mb-2">Feedback</h4>
                     <p className="bg-blue-50 p-3 rounded-lg text-sm text-primary border border-blue-200">
-                      {item.feedback}
+                      {item.feedback || "No feedback available"}
                     </p>
                   </div>
                   <div className="mt-4 text-right">
                     <span className={`font-bold ${getRatingColor(item.rating)}`}>
-                      Rating: {item.rating}/10
+                      Rating: {item.rating || "N/A"}/10
                     </span>
                   </div>
                 </CollapsibleContent>
@@ -184,8 +260,8 @@ const Feedback = ({ params }) => {
             ))}
 
             <div className="text-center mt-8">
-              <Button 
-                onClick={() => router.replace('/dashboard')}
+              <Button
+                onClick={() => router.replace("/dashboard")}
                 className="w-full md:w-auto"
               >
                 Return to Dashboard

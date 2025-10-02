@@ -1,15 +1,14 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
-import { db } from "@/utils/db";
-import { eq } from "drizzle-orm";
-import { MockInterview } from "@/utils/schema";
 import { Trash } from "lucide-react";
 import { toast } from "sonner";
 
-const InterviewItemCard = ({ interview }) => {
+const InterviewItemCard = ({ interview, onDelete }) => {
   const router = useRouter();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const onStart = () => {
     router.push(`/dashboard/interview/${interview?.mockId}`);
@@ -19,19 +18,36 @@ const InterviewItemCard = ({ interview }) => {
     router.push(`/dashboard/interview/${interview?.mockId}/feedback`);
   };
 
-  const onDelete = async () => {
+  const handleDelete = async () => {
+    setIsDeleting(true);
     try {
-      await db.delete(MockInterview).where(eq(MockInterview.mockId, interview?.mockId));
-      
-      // Close dialog and show success toast
-      setIsDialogOpen(false);
-      toast.success("Interview deleted successfully");
-      
-      // Use router to refresh instead of full page reload
-      router.refresh();
+      const response = await fetch('/api/deleteInterview', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          mockId: interview?.mockId
+        })
+      });
+
+      if (response.ok) {
+        setIsDialogOpen(false);
+        toast.success("Interview deleted successfully");
+        
+        // Call the onDelete callback to refresh the list
+        if (onDelete) {
+          onDelete();
+        }
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete interview');
+      }
     } catch (error) {
       console.error("Error deleting interview:", error);
-      toast.error("Failed to delete interview");
+      toast.error(error.message || "Failed to delete interview");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -43,12 +59,13 @@ const InterviewItemCard = ({ interview }) => {
         variant="outline"
         className="absolute top-2 right-2 flex items-center justify-center"
         onClick={() => setIsDialogOpen(true)}
+        disabled={isDeleting}
       >
-        <Trash className="text-red-600" />
+        <Trash className="text-red-600 h-4 w-4" />
       </Button>
 
       {/* Card Content */}
-      <div>
+      <div className="pr-8">
         <h2 className="font-bold text-primary">{interview?.jobPosition}</h2>
         <h2 className="text-sm text-gray-500">Experience: {interview?.jobExperience} Year(s)</h2>
         <h2 className="text-sm text-gray-500">Created At: {interview?.createdAt}</h2>
@@ -70,14 +87,19 @@ const InterviewItemCard = ({ interview }) => {
             <h3 className="text-lg font-bold mb-4">Confirm Deletion</h3>
             <p className="mb-4">Are you sure you want to delete this interview?</p>
             <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsDialogOpen(false)}
+                disabled={isDeleting}
+              >
                 Cancel
               </Button>
-              <Button 
-                variant="destructive" 
-                onClick={onDelete}
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={isDeleting}
               >
-                Confirm Delete
+                {isDeleting ? "Deleting..." : "Confirm Delete"}
               </Button>
             </div>
           </div>

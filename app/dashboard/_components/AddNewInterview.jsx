@@ -1,5 +1,7 @@
+//path: app/dashboard/_components/AddNewInterview.jsx
+
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,11 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { chatSession } from "@/utils/GeminiAIModal";
 import { LoaderCircle, Sparkles } from "lucide-react";
-import { MockInterview } from "@/utils/schema";
-import { v4 as uuidv4 } from 'uuid';
-import { db } from "@/utils/db";
 import { useUser } from "@clerk/nextjs";
 import moment from "moment";
 import { useRouter } from "next/navigation";
@@ -63,40 +61,50 @@ function AddNewInterview() {
     if (suggestion) {
       setJobDescription(suggestion);
       toast.info(`Auto-filled tech stack for ${role}`);
+    } else {
+      toast.error("No suggestion available for this role");
     }
   };
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-  
-    const inputPrompt = `Job position: ${jobPosition}, Job Description: ${jobDescription}, Years of Experience: ${jobExperience}.
-    Generate 5 interview questions and answers in JSON format.`;
-  
+
     try {
-      const result = await chatSession.sendMessage(inputPrompt);
-      const responseText = await result.response.text();
-      
-      const cleanedResponse = responseText.replace(/```json\n?|```/g, '').trim();
-      
-      const mockResponse = JSON.parse(cleanedResponse);
-      
-      const res = await db.insert(MockInterview)
-        .values({
-          mockId: uuidv4(),
-          jsonMockResp: JSON.stringify(mockResponse),
-          jobPosition: jobPosition,
-          jobDesc: jobDescription,
-          jobExperience: jobExperience,
-          createdBy: user?.primaryEmailAddress?.emailAddress,
-          createdAt: moment().format('DD-MM-YYYY'),
-        }).returning({ mockId: MockInterview.mockId });
+      // Create interview via API
+      const response = await fetch('/api/createInterview', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          jobPosition,
+          jobDescription,
+          jobExperience,
+          userEmail: user?.primaryEmailAddress?.emailAddress,
+          createdAt: moment().format('DD-MM-YYYY')
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create interview');
+      }
+
+      const data = await response.json();
       
       toast.success('Interview questions generated successfully!');
-      router.push(`dashboard/interview/${res[0]?.mockId}`);
+      setOpenDialog(false);
+      
+      // Reset form
+      setJobPosition("");
+      setJobDescription("");
+      setJobExperience("");
+      
+      router.push(`/dashboard/interview/${data.mockId}`);
     } catch (error) {
       console.error("Error generating interview:", error);
-      toast.error('Failed to generate interview questions.');
+      toast.error(error.message || 'Failed to generate interview questions.');
     } finally {
       setLoading(false);
     }
@@ -141,6 +149,7 @@ function AddNewInterview() {
                       size="icon" 
                       onClick={() => autoSuggestTechStack(jobPosition)}
                       disabled={!jobPosition}
+                      title="Auto-fill tech stack"
                     >
                       <Sparkles className="h-4 w-4" />
                     </Button>

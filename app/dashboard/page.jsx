@@ -62,9 +62,9 @@ function Dashboard() {
       const data = await response.json();
       
       // Filter interviews specific to the current user's email
-      const userSpecificInterviews = data.userAnswers.filter(
+      const userSpecificInterviews = data.userAnswers?.filter(
         interview => interview.userEmail === user.primaryEmailAddress.emailAddress
-      );
+      ) || [];
 
       setInterviewData(userSpecificInterviews);
 
@@ -107,6 +107,8 @@ function Dashboard() {
       .map(interview => parseInt(interview.rating || '0'))
       .sort((a, b) => a - b);
     
+    if (scores.length === 0 || scores[0] === 0) return 0;
+    
     const improvement = ((scores[scores.length - 1] - scores[0]) / scores[0]) * 100;
     return Math.round(improvement);
   };
@@ -139,9 +141,9 @@ function Dashboard() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-        {statsCards.map((card) => (
+        {statsCards.map((card, index) => (
           <div 
-            key={card.title}
+            key={`${card.title}-${index}`}
             className="bg-white p-4 sm:p-6 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center"
           >
             {card.icon}
