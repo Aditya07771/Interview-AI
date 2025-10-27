@@ -1,79 +1,109 @@
 "use client";
 
 import React from "react";
-import { Bot, UserCheck, Settings, Play, Send, ChartBar, Repeat } from "lucide-react";
+import { motion } from "framer-motion";
+import { Upload, Brain, MessageSquare, ArrowRight, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const HowItWorksPage = () => {
   const steps = [
     {
-      icon: <UserCheck size={48} className="text-indigo-600" />,
-      title: "Sign Up or Log In",
-      description: "Create an account or log in using Clerk. Build a personalized profile that tracks your interview journey and stores preferences."
+      number: "01",
+      icon: <Upload className="h-8 w-8" />,
+      title: "Upload or Enter Details",
+      description: "Upload your resume or fill in your job role and experience. Our AI reads and understands your background in seconds.",
+      color: "from-violet-500 to-violet-600"
     },
     {
-      icon: <Settings size={48} className="text-indigo-600" />,
-      title: "Choose Your Interview Type",
-      description: "Select from technical, behavioral, or mixed interviews. Customize difficulty, topics, and duration to match your career goals."
+      number: "02",
+      icon: <Brain className="h-8 w-8" />,
+      title: "AI Generates Questions",
+      description: "Using DeepSeek AI, we create personalized interview questions based on your skills, projects, and career goals.",
+      color: "from-indigo-500 to-indigo-600"
     },
     {
-      icon: <Play size={48} className="text-indigo-600" />,
-      title: "Start the Mock Interview",
-      description: "Our AI generates dynamic, contextually relevant questions powered by Gemini. One question at a time keeps you focused and engaged."
-    },
-    {
-      icon: <Send size={48} className="text-indigo-600" />,
-      title: "Submit Your Answers",
-      description: "Respond via text or multiple-choice options. Our intuitive interface tracks your responses and provides a seamless experience."
-    },
-    {
-      icon: <ChartBar size={48} className="text-indigo-600" />,
-      title: "Receive Real-Time Feedback",
-      description: "Get instant, AI-powered analysis of your responses. Understand your strengths, areas for improvement, and receive detailed scoring."
-    },
-    {
-      icon: <Repeat size={48} className="text-indigo-600" />,
-      title: "Continue Practicing",
-      description: "Access your interview history, track progress, and keep refining your skills with unlimited mock interviews and adaptive challenges."
+      number: "03",
+      icon: <MessageSquare className="h-8 w-8" />,
+      title: "Practice & Get Feedback",
+      description: "Talk to our voice agent for a live interview or answer manually — receive instant, detailed feedback on your performance.",
+      color: "from-purple-500 to-purple-600"
     }
   ];
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-800 mb-4">
-          <Bot className="inline-block mr-3 text-indigo-600" size={48} />
-          MockMate AI: Your Interview Preparation Companion
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white py-20">
+      {/* Hero Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="text-center mb-16 px-4"
+      >
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-violet-50 rounded-full mb-6">
+          <Sparkles className="h-4 w-4 text-violet-600" />
+          <span className="text-sm font-medium text-violet-600">Simple Process</span>
+        </div>
+        
+        <h1 className="text-4xl lg:text-5xl font-bold mb-6">
+          <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+            3 Steps to Smarter Interviews
+          </span>
         </h1>
-        <p className="text-xl text-gray-600">
-          Master your interviews with AI-powered practice and personalized insights
+        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          In just three easy steps, get ready for the most realistic mock interview experience powered by AI.
         </p>
+      </motion.div>
+
+      {/* Steps Grid */}
+      <div className="container mx-auto px-4 max-w-6xl">
+        <div className="grid md:grid-cols-3 gap-8">
+          {steps.map((step, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.2 }}
+              whileHover={{ y: -8 }}
+              className="relative group"
+            >
+              <div className="relative bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 h-full">
+                {/* Step Number */}
+                <div className="absolute -top-4 -right-4 w-16 h-16 bg-gradient-to-br from-violet-100 to-indigo-100 rounded-full flex items-center justify-center text-2xl font-bold text-violet-600">
+                  {step.number}
+                </div>
+                
+                {/* Icon */}
+                <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${step.color} text-white mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                  {step.icon}
+                </div>
+                
+                {/* Content */}
+                <h3 className="text-2xl font-bold mb-4 text-gray-900">{step.title}</h3>
+                <p className="text-gray-600 leading-relaxed">{step.description}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {steps.map((step, index) => (
-          <div 
-            key={step.title} 
-            className="bg-white p-6 rounded-lg shadow-md transition-transform hover:scale-105"
+      {/* CTA Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.8 }}
+        className="text-center mt-16 px-4"
+      >
+        <Link href="/dashboard">
+          <Button 
+            size="lg"
+            className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 group"
           >
-            <div className="flex items-center mb-4">
-              {step.icon}
-              <h2 className="ml-4 text-2xl font-semibold text-gray-800">
-                Step {index + 1}: {step.title}
-              </h2>
-            </div>
-            <p className="text-gray-600">{step.description}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="text-center mt-12">
-        <a 
-          href="/dashboard" 
-          className="bg-indigo-600 text-white px-8 py-3 rounded-full text-lg hover:bg-indigo-700 transition-colors"
-        >
-          Start Your Interview Journey
-        </a>
-      </div>
+            Start Your Interview Journey
+            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+          </Button>
+        </Link>
+      </motion.div>
     </div>
   );
 };

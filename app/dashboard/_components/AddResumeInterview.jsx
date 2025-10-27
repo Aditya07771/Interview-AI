@@ -2,7 +2,7 @@
 "use client";
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { FileText, X } from "lucide-react";
+import { FileText, X, Info } from "lucide-react";
 import { toast } from "sonner";
 
 function ResumeUploadForm({ resumeFile, setResumeFile }) {
@@ -10,16 +10,22 @@ function ResumeUploadForm({ resumeFile, setResumeFile }) {
     const file = e.target.files[0];
     
     if (file) {
-      // Check if file is PDF
-      if (file.type !== 'application/pdf') {
-        toast.error('Please upload a PDF file only');
+      // Check if file is PDF or DOCX
+      const validTypes = [
+        'application/pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/msword',
+      ];
+
+      if (!validTypes.includes(file.type)) {
+        toast.error('Please upload PDF or DOCX file only.');
         e.target.value = null;
         return;
       }
       
-      // Check file size (limit to 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('File size should be less than 5MB');
+      // Check file size (10MB max)
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('File size should be less than 10MB');
         e.target.value = null;
         return;
       }
@@ -41,6 +47,20 @@ function ResumeUploadForm({ resumeFile, setResumeFile }) {
         <label className="text-sm font-medium">
           Upload Your Resume <span className="text-red-500">*</span>
         </label>
+        
+        {/* Info Alert */}
+        <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-blue-900">
+            <p className="font-semibold mb-1">Supported formats:</p>
+            <ul className="list-disc list-inside space-y-1">
+              <li>PDF (text-based, not scanned images)</li>
+              <li>DOCX (Microsoft Word)</li>
+              <li>Maximum size: 10MB</li>
+            </ul>
+          </div>
+        </div>
+
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
           {!resumeFile ? (
             <>
@@ -49,12 +69,12 @@ function ResumeUploadForm({ resumeFile, setResumeFile }) {
                 <span className="text-sm text-gray-600">
                   Click to upload or drag and drop
                 </span>
-                <p className="text-xs text-gray-500 mt-1">PDF only (Max 5MB)</p>
+                <p className="text-xs text-gray-500 mt-1">PDF or DOCX (Max 10MB)</p>
               </label>
               <input
                 id="resume-upload"
                 type="file"
-                accept=".pdf"
+                accept=".pdf,.docx,.doc"
                 onChange={handleFileUpload}
                 className="hidden"
               />
@@ -87,9 +107,6 @@ function ResumeUploadForm({ resumeFile, setResumeFile }) {
         <p className="text-xs text-gray-500">
           We'll analyze your resume to generate relevant interview questions
         </p>
-      </div>
-      <div>
-        
       </div>
     </div>
   );

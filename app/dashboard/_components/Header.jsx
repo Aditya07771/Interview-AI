@@ -3,7 +3,8 @@ import { SignInButton, UserButton, SignedOut, SignedIn } from "@clerk/nextjs";
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Bot } from "lucide-react";
+import { Menu, X, Bot, ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 function Header() {
   const path = usePathname();
@@ -35,7 +36,6 @@ function Header() {
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen((prev) => !prev);
     
-    // Prevent body scrolling when menu is open
     if (!isMobileMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
@@ -57,184 +57,246 @@ function Header() {
 
   return (
     <>
-      <header
-        className={`
-          fixed top-0 left-0 right-0 
-          flex justify-between items-center 
-          p-4 sm:p-5 
-          bg-white/90 backdrop-blur-md 
-          shadow-md z-50 
-          transition-all duration-300 ease-in-out
-          ${isVisible ? "translate-y-0" : "-translate-y-full"}
-        `}
+      <motion.nav
+        initial={{ y: -100 }}
+        animate={{ y: isVisible ? 0 : -100 }}
+        transition={{ duration: 0.3 }}
+        className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-b border-gray-100 z-50"
       >
-        {/* Logo */}
-        <Link 
-          href="/" 
-          className="flex items-center gap-2"
-          aria-label="MockMate AI Home"
-          onClick={closeMobileMenu}
-        >
-          <Bot className="text-indigo-600" size={28} />
-          <span className="text-xl sm:text-2xl font-bold text-indigo-600">MockMate AI</span>
-        </Link>
-
-        {/* Desktop Navigation */}
-        <nav 
-          className="hidden md:flex gap-4 lg:gap-6"
-          aria-label="Main Navigation"
-        >
-          {navItems.map((item) => (
-            <NavItem
-              key={item.href}
-              path={path}
-              href={item.href}
-              label={item.label}
-              onClick={closeMobileMenu}
-            />
-          ))}
-        </nav>
-
-        {/* Mobile Menu Toggle */}
-        <div className="md:hidden">
-          <button
-            onClick={toggleMobileMenu}
-            className="focus:outline-none text-gray-600 hover:text-indigo-600 transition-colors"
-            aria-label={isMobileMenuOpen ? "Close Menu" : "Open Menu"}
-            aria-expanded={isMobileMenuOpen}
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-
-        {/* Desktop Authentication */}
-        <div className="hidden md:block">
-          <SignedOut>
-            <SignInButton mode="modal">
-              <button 
-                className="
-                  px-4 py-2 
-                  bg-indigo-600 text-white 
-                  rounded-md 
-                  hover:bg-indigo-700 
-                  transition-colors
-                  focus:outline-none 
-                  focus:ring-2 
-                  focus:ring-indigo-500 
-                  focus:ring-offset-2
-                "
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-2 group">
+              <motion.div 
+                whileHover={{ scale: 1.1 }}
+                className="p-2 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 transition-transform"
               >
-                Sign In
-              </button>
-            </SignInButton>
-          </SignedOut>
-          <SignedIn>
-            <UserButton 
-              afterSignOutUrl="/" 
-              appearance={{
-                elements: {
-                  userButtonAvatarBox: "w-10 h-10",
-                },
-              }} 
-            />
-          </SignedIn>
-        </div>
-      </header>
+                <Bot className="h-6 w-6 text-white" />
+              </motion.div>
+              <span className="text-xl font-bold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+                MockMate AI
+              </span>
+            </Link>
 
-      {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div 
-          className="
-            fixed inset-0 top-0 
-            bg-white z-40 md:hidden 
-            overflow-hidden
-            pt-16
-          "
-          role="dialog"
-          aria-modal="true"
-          aria-label="Mobile Navigation Menu"
-        >
-          <div className="h-full overflow-y-auto pb-16">
-            <nav className="space-y-6 p-6">
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-8">
               {navItems.map((item) => (
-                <NavItem
+                <Link
                   key={item.href}
-                  path={path}
                   href={item.href}
-                  label={item.label}
-                  mobile
-                  onClick={closeMobileMenu}
-                />
+                  className={`
+                    relative font-medium transition-colors group
+                    ${path === item.href 
+                      ? 'text-violet-600' 
+                      : 'text-gray-600 hover:text-gray-900'
+                    }
+                  `}
+                >
+                  {item.label}
+                  <span 
+                    className={`
+                      absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-violet-600 to-indigo-600 
+                      transition-all duration-300
+                      ${path === item.href ? 'w-full' : 'w-0 group-hover:w-full'}
+                    `}
+                  />
+                </Link>
               ))}
+            </div>
 
-              {/* Mobile Authentication */}
-              <div className="pt-6 border-t">
+            {/* Desktop Auth Section */}
+            <div className="hidden md:flex items-center gap-4">
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <motion.button
+                    whileHover={{ scale: 1.05, translateY: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="
+                      px-6 py-2.5
+                      bg-gradient-to-r from-violet-600 to-indigo-600 
+                      hover:from-violet-700 hover:to-indigo-700 
+                      text-white font-medium
+                      rounded-lg
+                      shadow-lg hover:shadow-xl 
+                      transition-all duration-300
+                      flex items-center gap-2
+                    "
+                  >
+                    Get Started
+                    <ArrowRight className="h-4 w-4" />
+                  </motion.button>
+                </SignInButton>
+              </SignedOut>
+              
+              <SignedIn>
+                <UserButton 
+                  afterSignOutUrl="/"
+                  appearance={{
+                    elements: {
+                      userButtonAvatarBox: "w-10 h-10 border-2 border-violet-100",
+                      userButtonPopoverCard: "shadow-xl",
+                      userButtonPopoverActionButton: "hover:bg-violet-50",
+                    },
+                  }}
+                />
+              </SignedIn>
+            </div>
+
+            {/* Mobile Menu Toggle */}
+            <div className="md:hidden">
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={toggleMobileMenu}
+                className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-violet-600 transition-colors"
+                aria-label={isMobileMenuOpen ? "Close Menu" : "Open Menu"}
+              >
+                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </motion.button>
+            </div>
+          </div>
+        </div>
+      </motion.nav>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={closeMobileMenu}
+              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
+            />
+
+            {/* Mobile Menu Panel */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="
+                fixed right-0 top-0 bottom-0
+                w-[80%] max-w-sm
+                bg-white shadow-2xl z-50 md:hidden
+                overflow-y-auto
+              "
+            >
+              {/* Mobile Menu Header */}
+              <div className="flex items-center justify-between p-4 border-b">
+                <Link href="/" onClick={closeMobileMenu} className="flex items-center gap-2">
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600">
+                    <Bot className="h-5 w-5 text-white" />
+                  </div>
+                  <span className="text-lg font-bold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+                    MockMate AI
+                  </span>
+                </Link>
+                <button
+                  onClick={closeMobileMenu}
+                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <X size={20} className="text-gray-600" />
+                </button>
+              </div>
+
+              {/* Mobile Navigation Links */}
+              <nav className="p-4 space-y-2">
+                {navItems.map((item, index) => (
+                  <motion.div
+                    key={item.href}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Link
+                      href={item.href}
+                      onClick={closeMobileMenu}
+                      className={`
+                        block px-4 py-3 rounded-lg font-medium
+                        transition-all duration-300
+                        ${path === item.href
+                          ? 'bg-gradient-to-r from-violet-50 to-indigo-50 text-violet-600 border-l-4 border-violet-600'
+                          : 'text-gray-700 hover:bg-gray-50 hover:text-violet-600'
+                        }
+                      `}
+                    >
+                      {item.label}
+                    </Link>
+                  </motion.div>
+                ))}
+              </nav>
+
+              {/* Mobile Auth Section */}
+              <div className="p-4 border-t mt-4">
                 <SignedOut>
                   <SignInButton mode="modal">
-                    <button 
-                      className="
-                        w-full px-4 py-2 
-                        bg-indigo-600 text-white 
-                        rounded-md 
-                        hover:bg-indigo-700 
-                        transition-colors
-                        focus:outline-none 
-                        focus:ring-2 
-                        focus:ring-indigo-500 
-                        focus:ring-offset-2
-                      "
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={closeMobileMenu}
+                      className="
+                        w-full px-4 py-3
+                        bg-gradient-to-r from-violet-600 to-indigo-600
+                        hover:from-violet-700 hover:to-indigo-700
+                        text-white font-medium
+                        rounded-lg
+                        shadow-lg hover:shadow-xl
+                        transition-all duration-300
+                        flex items-center justify-center gap-2
+                      "
                     >
-                      Sign In
-                    </button>
+                      Get Started
+                      <ArrowRight className="h-4 w-4" />
+                    </motion.button>
                   </SignInButton>
                 </SignedOut>
+
                 <SignedIn>
-                  <div className="flex justify-center">
-                    <UserButton 
-                      afterSignOutUrl="/" 
-                      appearance={{
-                        elements: {
-                          userButtonAvatarBox: "w-12 h-12 mx-auto",
-                        },
-                      }} 
-                    />
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600 mb-3">Account</p>
+                      <UserButton
+                        afterSignOutUrl="/"
+                        appearance={{
+                          elements: {
+                            userButtonAvatarBox: "w-16 h-16 border-2 border-violet-100",
+                            userButtonPopoverCard: "shadow-xl",
+                          },
+                        }}
+                      />
+                    </div>
+                    <Link
+                      href="/dashboard"
+                      onClick={closeMobileMenu}
+                      className="
+                        w-full px-4 py-2
+                        bg-violet-50 text-violet-600
+                        rounded-lg font-medium
+                        hover:bg-violet-100
+                        transition-colors
+                        text-center
+                      "
+                    >
+                      Go to Dashboard
+                    </Link>
                   </div>
                 </SignedIn>
               </div>
-            </nav>
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
 
-function NavItem({ path, href, label, mobile, onClick }) {
-  return (
-    <Link 
-      href={href} 
-      onClick={onClick}
-      className={`
-        block 
-        transition-all duration-300 ease-in-out 
-        cursor-pointer 
-        rounded-lg 
-        focus:outline-none 
-        focus:ring-2 
-        focus:ring-indigo-500
-        ${mobile
-          ? "w-full text-lg py-3 text-center"
-          : "px-3 py-2 hover:bg-indigo-100 hover:text-indigo-600"
-        }
-        ${path === href
-          ? "text-indigo-600 font-bold bg-indigo-100"
-          : "text-gray-700 hover:text-indigo-600"
-        }
-      `}
-    >
-      {label}
-    </Link>
+              {/* Mobile Menu Footer */}
+              <div className="p-4 border-t">
+                <p className="text-xs text-gray-500 text-center">
+                  © 2025 MockMate AI. All rights reserved.
+                </p>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 

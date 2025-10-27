@@ -1,121 +1,166 @@
 'use client'
-import { useState } from 'react'
-import { 
-  Users, 
-  Target, 
-  Award, 
-  Briefcase, 
-  BookOpen, 
-  Rocket 
-} from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Sparkles, Target, Users, Award } from 'lucide-react'
+import { Card } from '@/components/ui/card'
 
 const AboutUsPage = () => {
-  const [activeTab, setActiveTab] = useState('mission')
-
-  const tabContent = {
-    mission: {
-      icon: <Target className="mr-2 text-indigo-600" />,
-      content: (
-        <div className="space-y-4">
-          <p className="text-base md:text-lg">MockMate AI is on a mission to revolutionize interview preparation by providing personalized, intelligent AI coaching tailored to individual career aspirations.</p>
-          <p className="text-base md:text-lg">With MockMate AI, the goal is to bridge the gap between preparation and success, empowering users to unlock their full potential.</p>
-        </div>
-      )
+  const teamMembers = [
+    {
+      name: "Aditya Nishad",
+      role: "Team Lead",
+      image: "/team/aditya.jpg", // Add your image to public/team/
+      description: "Leading the vision and technical architecture"
     },
-    story: {
-      icon: <BookOpen className="mr-2 text-indigo-600" />,
-      content: (
-        <div className="space-y-4">
-          <p className="text-base md:text-lg">The idea for MockMate AI was born from firsthand experiences with the challenges of interview preparation. As a solo developer, I wanted to create a platform that simplifies the process and builds confidence in individuals.</p>
-          <p className="text-base md:text-lg">This journey has been a testament to the power of passion and innovation, leading to the creation of an impactful tool for career growth.</p>
-        </div>
-      )
+    {
+      name: "Kaushal Patil",
+      role: "UI/UX Designer",
+      image: "/team/kaushal.jpg",
+      description: "Building seamless user experiences"
     },
-    approach: {
-      icon: <Rocket className="mr-2 text-indigo-600" />,
-      content: (
-        <div className="space-y-4">
-          <p className="text-base md:text-lg">MockMate AI leverages advanced AI algorithms to generate dynamic, contextually relevant interview questions based on your professional background and goals.</p>
-          <p className="text-base md:text-lg">Through real-time analysis and feedback, the platform provides actionable insights, enabling users to improve with every mock interview attempt.</p>
-        </div>
-      )
+    {
+      name: "Vinaykumar Singh",
+      role: "Backend Developer",
+      image: "/team/vinaykumar.jpg",
+      description: "Powering the AI infrastructure"
+    },
+    {
+      name: "Ravnit Yadav",
+      role: "AI Specialist",
+      image: "/team/ravnit.jpg",
+      description: "Crafting beautiful interfaces"
     }
-  }
+  ]
 
-  const coreValues = [
+  const values = [
     {
-      icon: <Award className="w-12 h-12 text-indigo-600 mb-4" />,
-      title: "Continuous Learning",
-      description: "Always striving to improve and provide better tools for growth."
+      icon: <Target className="h-8 w-8" />,
+      title: "Mission Driven",
+      description: "Democratizing interview preparation with AI"
     },
     {
-      icon: <Users className="w-12 h-12 text-indigo-600 mb-4" />,
-      title: "Empowerment",
-      description: "Supporting individuals in building confidence and achieving professional success."
+      icon: <Users className="h-8 w-8" />,
+      title: "User First",
+      description: "Building tools that truly help candidates succeed"
     },
     {
-      icon: <Briefcase className="w-12 h-12 text-indigo-600 mb-4" />,
+      icon: <Award className="h-8 w-8" />,
       title: "Excellence",
-      description: "Delivering high-quality, impactful features to simplify interview preparation."
+      description: "Delivering the best AI-powered interview experience"
     }
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 sm:py-12 md:py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Hero Section */}
-        <div className="text-center mb-8 sm:mb-12 md:mb-16">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900">
-            About MockMate AI
-          </h1>
-          <p className="mt-4 max-w-xl mx-auto text-base sm:text-lg md:text-xl text-gray-600 px-4">
-            Empowering professionals to ace interviews through intelligent, personalized AI coaching
-          </p>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white py-20">
+      {/* Hero Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="text-center mb-16 px-4"
+      >
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-violet-50 rounded-full mb-6">
+          <Sparkles className="h-4 w-4 text-violet-600" />
+          <span className="text-sm font-medium text-violet-600">Our Story</span>
         </div>
+        
+        <h1 className="text-4xl lg:text-5xl font-bold mb-6">
+          <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+            Meet the Team Behind MockMate AI
+          </span>
+        </h1>
+        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          We're a passionate team building the future of interview preparation
+        </p>
+      </motion.div>
 
-        {/* Tabs Section */}
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden mb-8 sm:mb-12 md:mb-16">
-          <div className="flex flex-col sm:flex-row border-b">
-            {Object.keys(tabContent).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`w-full sm:flex-1 py-3 sm:py-4 px-4 sm:px-6 flex items-center justify-center 
-                  ${activeTab === tab 
-                    ? 'bg-indigo-50 text-indigo-700 border-b-2 border-indigo-600' 
-                    : 'text-gray-500 hover:bg-gray-100'}`}
-              >
-                {tabContent[tab].icon}
-                <span className="hidden sm:inline">
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                </span>
-              </button>
-            ))}
-          </div>
-          <div className="p-4 sm:p-6 md:p-8">
-            {tabContent[activeTab].content}
-          </div>
-        </div>
-
-        {/* Values Section */}
-        <div className="bg-white rounded-lg shadow-md p-6 sm:p-8 md:p-12">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gray-900 mb-8 sm:mb-10 md:mb-12">
-            Our Core Values
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {coreValues.map((value, index) => (
-              <div 
-                key={index} 
-                className="text-center bg-gray-50 p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300"
-              >
-                <div className="flex justify-center">{value.icon}</div>
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">{value.title}</h3>
-                <p className="text-base text-gray-600">{value.description}</p>
-              </div>
-            ))}
-          </div>
+      {/* Team Section */}
+      <div className="container mx-auto px-4 max-w-6xl mb-20">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {teamMembers.map((member, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              whileHover={{ y: -8 }}
+            >
+              <Card className="relative p-6 bg-white hover:shadow-2xl transition-all duration-300 border-gray-100 h-full group">
+                <div className="text-center">
+                 
+                  <img 
+                    src={member.image} 
+                    alt={member.name}
+                    className="w-32 h-32 mx-auto mb-4 rounded-full object-contain group-hover:scale-110 transition-transform "
+                  />
+                 
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">{member.name}</h3>
+                  <p className="text-violet-600 font-medium mb-3">{member.role}</p>
+                  <p className="text-gray-600 text-sm">{member.description}</p>
+                </div>
+              </Card>
+            </motion.div>
+          ))}
         </div>
       </div>
+
+      {/* Values Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+        className="bg-gradient-to-r from-violet-50 to-indigo-50 py-16"
+      >
+        <div className="container mx-auto px-4 max-w-6xl">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+              Our Values
+            </span>
+          </h2>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {values.map((value, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="text-center"
+              >
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white shadow-lg text-violet-600 mb-4">
+                  {value.icon}
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{value.title}</h3>
+                <p className="text-gray-600">{value.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Mission Statement */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+        className="container mx-auto px-4 max-w-4xl mt-20 text-center"
+      >
+        <Card className="p-10 bg-white shadow-xl border-gray-100">
+          <h2 className="text-3xl font-bold mb-6">
+            <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+              Our Mission
+            </span>
+          </h2>
+          <p className="text-lg text-gray-600 leading-relaxed">
+            MockMate AI is revolutionizing interview preparation by making AI-powered coaching accessible to everyone. 
+            We believe that with the right preparation and confidence, anyone can ace their dream interview. 
+            Our platform combines cutting-edge AI technology with human insight to deliver personalized, 
+            effective interview practice that adapts to each user's unique needs and goals.
+          </p>
+        </Card>
+      </motion.div>
     </div>
   )
 }

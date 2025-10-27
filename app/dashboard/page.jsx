@@ -3,18 +3,19 @@
 import React, { useEffect, useState } from 'react'
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 import {
   Bot,
   Plus,
   ListChecks,
   Trophy,
-  Zap,
-  TrendingUp 
+  TrendingUp,
+  Sparkles,
+  ArrowRight
 } from "lucide-react";
 
 import AddNewInterview from './_components/AddNewInterview'
 import InterviewList from './_components/InterviewList'
-import AddResumeInterview from './_components/AddResumeInterview';
 
 function Dashboard() {
   const { user } = useUser();
@@ -22,22 +23,26 @@ function Dashboard() {
   const [isNewInterviewModalOpen, setIsNewInterviewModalOpen] = useState(false);
   const [statsCards, setStatsCards] = useState([
     {
-      icon: <ListChecks size={32} className="text-indigo-600" />,
+      icon: <ListChecks className="h-8 w-8" />,
       title: "Total Interviews",
-      value: "0"
+      value: "0",
+      color: "from-violet-500 to-violet-600"
     },
     {
-      icon: <Trophy size={32} className="text-green-600" />,
+      icon: <Trophy className="h-8 w-8" />,
       title: "Best Score",
-      value: "N/A"
+      value: "N/A",
+      color: "from-indigo-500 to-indigo-600"
     },
     {
-      icon: <TrendingUp size={32} className="text-blue-600" />,
+      icon: <TrendingUp className="h-8 w-8" />,
       title: "Improvement Rate",
-      value: "0%"
+      value: "0%",
+      color: "from-purple-500 to-purple-600"
     }
   ]);
 
+  // Keep all existing logic...
   const fetchInterviews = async () => {
     if (!user?.primaryEmailAddress?.emailAddress) {
       toast.error("User email not found");
@@ -62,14 +67,12 @@ function Dashboard() {
   
       const data = await response.json();
       
-      // Filter interviews specific to the current user's email
       const userSpecificInterviews = data.userAnswers?.filter(
         interview => interview.userEmail === user.primaryEmailAddress.emailAddress
       ) || [];
 
       setInterviewData(userSpecificInterviews);
 
-      // Calculate and update stats
       const totalInterviews = userSpecificInterviews.length;
       const bestScore = totalInterviews > 0 
         ? Math.max(...userSpecificInterviews.map(item => parseInt(item.rating || '0')))
@@ -110,7 +113,6 @@ function Dashboard() {
     
     if (scores.length === 0 || scores[0] === 0) return 0;
     
-    // const improvement = ((scores[scores.length - 1] - scores[0]) / scores[0]) * 100;
     const improvement = 30;
     
     return Math.round(improvement);
@@ -123,74 +125,115 @@ function Dashboard() {
   }, [user]);
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      {/* User Greeting */}
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-8 space-y-4 sm:space-y-0">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 flex items-center gap-3">
-            <Bot className="text-indigo-600" size={32} />
-            Dashboard
-          </h2>
-          <h3 className="text-lg sm:text-xl text-gray-600 mt-2">
-            Welcome, {user?.firstName || 'Interviewer'}
-          </h3>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-gray-500 text-sm sm:text-base">
-            {user?.primaryEmailAddress?.emailAddress || 'Not logged in'}
-          </span>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white py-8 mt-15">
+      <div className="container mx-auto px-4">
+        {/* Header Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="mb-8"
+        >
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-violet-50 rounded-full mb-4">
+                <Sparkles className="h-4 w-4 text-violet-600" />
+                <span className="text-sm font-medium text-violet-600">AI Interview Platform</span>
+              </div>
+              <h1 className="text-4xl font-bold mb-2">
+                <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+                  Welcome back, {user?.firstName || 'Interviewer'}!
+                </span>
+              </h1>
+              <p className="text-gray-600">
+                {user?.primaryEmailAddress?.emailAddress || 'Continue your interview preparation journey'}
+              </p>
+            </div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <button
+                onClick={() => setIsNewInterviewModalOpen(true)}
+                className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 group"
+              >
+                <Plus className="h-5 w-5" />
+                New Interview
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </motion.div>
+          </div>
+        </motion.div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-        {statsCards.map((card, index) => (
-          <div 
-            key={`${card.title}-${index}`}
-            className="bg-white p-4 sm:p-6 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center"
-          >
-            {card.icon}
-            <div className="ml-4">
-              <p className="text-xs sm:text-sm text-gray-500">{card.title}</p>
-              <p className="text-xl sm:text-2xl font-bold text-gray-800">{card.value}</p>
+        {/* Stats Cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10"
+        >
+          {statsCards.map((card, index) => (
+            <motion.div
+              key={`${card.title}-${index}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              whileHover={{ y: -5 }}
+              className="relative group"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-violet-200 to-indigo-200 rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-300" />
+              <div className="relative bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100">
+                <div className={`inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br ${card.color} text-white mb-4 group-hover:scale-110 transition-transform`}>
+                  {card.icon}
+                </div>
+                <p className="text-sm text-gray-500 mb-1">{card.title}</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                  {card.value}
+                </p>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Create Interview Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="bg-gradient-to-r from-violet-50 to-indigo-50 rounded-3xl p-8 mb-10"
+        >
+          <div className="flex flex-col sm:flex-row items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Start Your Practice Session
+              </h2>
+              <p className="text-gray-600">
+                Create a new AI-powered mock interview tailored to your needs
+              </p>
             </div>
           </div>
-        ))}
-      </div>
 
-      {/* Interview Section */}
-      <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
-        <div className="flex flex-col sm:flex-row items-center justify-between mb-6 space-y-4 sm:space-y-0">
-          <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 flex items-center gap-3">
-            <Zap size={24} className="text-yellow-500" />
-            Create AI Mock Interview
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <AddNewInterview 
+              isOpen={isNewInterviewModalOpen} 
+              onClose={() => setIsNewInterviewModalOpen(false)} 
+            />
+          </div>
+        </motion.div>
+
+        {/* Interview History */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <h2 className="text-2xl font-bold mb-6">
+            <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+              Your Interview History
+            </span>
           </h2>
-          <button 
-            onClick={() => setIsNewInterviewModalOpen(true)}
-            className="flex items-center bg-indigo-600 text-white px-4 py-2 rounded-full hover:bg-indigo-700 transition-colors"
-          >
-            <Plus size={20} className="mr-2" />
-            New Interview
-          </button>
-        </div>
-
-        {/* Add New Interview Component */}
-        <div className='grid grid-cols-1 sm:grid-cols-3 gap-6'>
-          <AddNewInterview 
-            isOpen={isNewInterviewModalOpen} 
-            onClose={() => setIsNewInterviewModalOpen(false)} 
-          />
-          
-        </div>
-
-      </div>
-
-     {/* Interview History */}
-     <div className="mt-8">
-        <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-6">
-          Interview History
-        </h2>
-        <InterviewList interviews={interviewData} />
+          <InterviewList interviews={interviewData} />
+        </motion.div>
       </div>
     </div>
   );
