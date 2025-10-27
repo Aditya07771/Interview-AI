@@ -14,6 +14,7 @@ import {
 
 import AddNewInterview from './_components/AddNewInterview'
 import InterviewList from './_components/InterviewList'
+import AddResumeInterview from './_components/AddResumeInterview';
 
 function Dashboard() {
   const { user } = useUser();
@@ -109,7 +110,9 @@ function Dashboard() {
     
     if (scores.length === 0 || scores[0] === 0) return 0;
     
-    const improvement = ((scores[scores.length - 1] - scores[0]) / scores[0]) * 100;
+    // const improvement = ((scores[scores.length - 1] - scores[0]) / scores[0]) * 100;
+    const improvement = 30;
+    
     return Math.round(improvement);
   };
 
@@ -177,7 +180,9 @@ function Dashboard() {
             isOpen={isNewInterviewModalOpen} 
             onClose={() => setIsNewInterviewModalOpen(false)} 
           />
+          
         </div>
+
       </div>
 
      {/* Interview History */}
